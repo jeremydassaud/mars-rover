@@ -35,6 +35,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
+      - name: Détection des dépendances circulaires 🔄
+        run: |
+            echo "🔍 Recherche de dépendances circulaires..."
+            pwsh -File detect-circular.ps1    
       - name: Restore NuGet Packages
         run: dotnet restore
 
