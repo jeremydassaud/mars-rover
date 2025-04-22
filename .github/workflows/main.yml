@@ -181,6 +181,6 @@ jobs:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,workflow
           text: |
-             ${{ steps.test.outputs.weather == 'sunny' && '☀️ Mission spatiale réussie !' || '⛈️ Problèmes dans la station spatiale !' }}
+             ${{ steps.test.outputs.weather == 'sunny' && 'https://tenor.com/view/fun-lol-yolo-samantha-oups-gif-22116992 Mission spatiale réussie !' || 'https://tenor.com/view/fun-lol-yolo-samantha-oups-gif-22116992 Problèmes dans la station spatiale !' }}
         env:
            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
