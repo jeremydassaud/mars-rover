@@ -176,41 +176,11 @@ jobs:
           fi
       - name: Notification Slack avec GIF
         if: always() && env.SLACK_WEBHOOK_URL != ''
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: 8398a7/action-slack@v3
         with:
-          payload: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Mission spatiale ${{ github.repository }}*\n${{ github.actor }} a lancé une nouvelle mission !"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "${{ steps.weather.outputs.status == 'sunny' && '🟢 Mission accomplie avec succès !' || '🔴 Houston, nous avons un problème !' }}"
-                  }
-                },
-                {
-                  "type": "image",
-                  "image_url": "${{ steps.weather.outputs.status == 'sunny' && 'https://media.tenor.com/EpRdRLqvhM4AAAAd/rocket-launch-space-x.gif' || 'https://tenor.com/bEXNQ.gif' }}",
-                  "alt_text": "Space GIF"
-                },
-                {
-                  "type": "context",
-                  "elements": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "👾 *Commit:* ${{ github.event.after || github.sha }} | *Branche:* ${{ github.ref_name }} | *Workflow:* ${{ github.workflow }}"
-                    }
-                  ]
-                }
-              ]
-            }
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,workflow
+          text: |
+            ${{ steps.weather.outputs.status == 'sunny' && '☀️ Mission spatiale réussie ! https://media.tenor.com/EpRdRLqvhM4AAAAd/rocket-launch-space-x.gif' || '⛈️ Problèmes dans la station spatiale ! https://tenor.com/bEXNQ.gif' }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
