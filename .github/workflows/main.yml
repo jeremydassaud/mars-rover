@@ -176,11 +176,18 @@ jobs:
           fi
       - name: Notification Slack avec GIF
         if: always() && env.SLACK_WEBHOOK_URL != ''
-        uses: 8398a7/action-slack@v3
+        uses: slackapi/slack-github-action@v1.24.0
         with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,workflow
-          text: |
-            ${{ steps.weather.outputs.status == 'sunny' && '☀️ Mission spatiale réussie ! https://media.tenor.com/EpRdRLqvhM4AAAAd/rocket-launch-space-x.gif' || '⛈️ Problèmes dans la station spatiale ! https://tenor.com/bEXNQ.gif' }}
+          payload: |
+            {
+              "text": "${{ steps.weather.outputs.status == 'sunny' && '☀️ Mission spatiale réussie !' || '⛈️ Problèmes dans la station spatiale !' }}",
+              "attachments": [
+                {
+                  "fallback": "GIF Status",
+                  "image_url": "${{ steps.weather.outputs.status == 'sunny' && 'https://media.tenor.com/EpRdRLqvhM4AAAAd/rocket-launch-space-x.gif' || 'https://tenor.com/bEXNQ.gif' }}"
+                }
+              ]
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
