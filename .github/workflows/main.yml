@@ -178,6 +178,8 @@ jobs:
         if: always() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.24.0
         with:
+          fields: repo,message,commit,author,action,eventName,workflow
+          status: ${{ job.status }}
           payload: |
             {
               "text": "${{ steps.weather.outputs.status == '0' && '☀️ Mission spatiale réussie !' || '⛈️ Problèmes dans la station spatiale !' }}",
