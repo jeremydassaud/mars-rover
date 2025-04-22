@@ -25,7 +25,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '7.0.x'
+          dotnet-version: '8.0.x'
 
       - uses: actions/cache@v3
         id: nuget-cache
@@ -178,14 +178,22 @@ jobs:
           if [ -n "$DELETED" ] && [ -n "$ADDED" ] && [ $DELETED -gt $ADDED ]; then
             echo "🕳️ Trou noir détecté ! $DELETED lignes supprimées, seulement $ADDED ajoutées."
           fi
-
-      - name: Notification Slack
-        if: always()
-        uses: 8398a7/action-slack@v3
+      - name: Notification Slack avec GIF
+        if: always() && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1.24.0
         with:
-          status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,workflow
-          text: |
-            ${{ steps.test.outputs.weather == 'sunny' && '☀️ Mission spatiale réussie !' || '⛈️ Problèmes dans la station spatiale !' }}
+          status: ${{ job.status }}
+          payload: |
+            {
+              "text": "${{ steps.weather.outputs.status == '0' && '☀️ Mission spatiale réussie !' || '⛈️ Problèmes dans la station spatiale !' }}",
+              "attachments": [
+                {
+                  "fallback": "GIF Status",
+                  "image_url": "${{ steps.weather.outputs.status == '0' && 'https://media1.tenor.com/m/4aOGa3qJd48AAAAC/zelda-vieux.gif' || 'https://media.tenor.com/KXiaGEO_avgAAAAM/king-harkinian.gif' }}"
+                }
+              ]
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
