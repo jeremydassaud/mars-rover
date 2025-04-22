@@ -1,4 +1,4 @@
-# C# 7 + xUnit Starter for Coding Dojo
+# C# 7 + xUnit Starter for Coding Doj
 
 This project provides a starter pack for Coding Dojo sessions using C# 7 and xUnit for testing. It is designed to help you quickly set up a C# project with xUnit as the testing framework so that you can focus on practicing coding katas and improving your programming skills.
 
