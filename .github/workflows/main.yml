@@ -1,15 +1,26 @@
-name: .NET Core CI
-
+name: .NET Core CI - Space Mission
 on:
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Nécessaire pour certaines analyses de code
+
+      - name: Vérifier message de commit spatial 🚀
+        if: github.event_name == 'push'
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if ! echo "$COMMIT_MSG" | grep -q -E '(🚀|🛰️|🌠|🌌|👩‍🚀|👨‍🚀|🌟|🪐|🌑|🌙|☄️|🌠)'; then
+            echo "::error::Le commit du cosmonaute : Ton message de commit doit contenir un emoji spatial!"
+            exit 1
+          fi
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v2
@@ -23,12 +34,154 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
-        
+
       - name: Restore NuGet Packages
         run: dotnet restore
-        
+
       - name: Build
         run: dotnet build --no-restore
-        
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+
+      - name: Lancement des tests spatiaux 🧪
+        id: test
+        continue-on-error: true
+        run: |
+          START_TIME=$(date +%s)
+          dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+          echo "test_success=$?" >> $GITHUB_OUTPUT
+
+      - name: Météo des tests 🌦️
+        if: always()
+        run: |
+          if [ "${{ steps.test.outputs.test_success }}" == "0" ]; then
+            echo "☀️ Tests réussis ! Le soleil brille sur notre mission spatiale !"
+            echo "::set-output name=weather::sunny"
+          else
+            echo "⛈️ Alerte météo spatiale ! Tempête détectée dans les tests !"
+            echo "::set-output name=weather::storm"
+          fi
+
+      - name: Alien Code Review 👽
+        if: steps.test.outputs.test_success != '0'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const alienMessages = [
+              "👽 Humain, ton code est incompréhensible pour ma civilisation. Peux-tu ajouter des tests ?",
+              "🛸 Nos scanners extraterrestres ont détecté des anomalies dans votre logique terrienne.",
+              "👾 Code erreur 42: Logique humaine incohérente détectée.",
+              "🪐 Par les anneaux de Saturne ! Ce code ne passerait pas les standards galactiques.",
+              "🌌 La Fédération Intergalactique du Code désapprouve ces pratiques."
+            ];
+            const randomMessage = alienMessages[Math.floor(Math.random() * alienMessages.length)];
+            
+            const issue_number = context.issue.number;
+            if (issue_number) {
+              github.rest.issues.createComment({
+                issue_number: issue_number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: randomMessage
+              });
+            }
+
+      - name: Mesurer la couverture de code
+        if: always()
+        id: coverage
+        run: |
+          # Installe l'outil de rapport de couverture si nécessaire
+          dotnet tool install -g dotnet-reportgenerator-globaltool || true
+          reportgenerator -reports:./coverage/**/coverage.cobertura.xml -targetdir:./coverage/report -reporttypes:Html
+          
+          # Extraire le pourcentage de couverture (exemple simple)
+          COVERAGE=$(grep -o '[0-9]*\.[0-9]*%' ./coverage/report/summary.txt || echo "0%")
+          COVERAGE_NUM=$(echo $COVERAGE | sed 's/%//')
+          echo "coverage=$COVERAGE_NUM" >> $GITHUB_OUTPUT
+
+      - name: Lancement Spatial 🚀
+        if: always()
+        run: |
+          COVERAGE="${{ steps.coverage.outputs.coverage }}"
+          if [ $(echo "$COVERAGE > 80" | bc -l) -eq 1 ]; then
+            echo "🚀 Décollage réussi ! Couverture de code à $COVERAGE% !"
+            echo "
+            
+                   /\\
+                  /  \\
+                 |    |
+                 |    |
+                 |    |
+                /      \\
+               /        \\
+              /          \\
+             /            \\
+            /              \\
+           /                \\
+           ------------------
+                 /  \\
+                /    \\
+               |      |
+                \\__/
+            "
+          elif [ $(echo "$COVERAGE < 50" | bc -l) -eq 1 ]; then
+            echo "💥 Explosion à $COVERAGE% de couverture !"
+            echo "
+            
+                   /\\
+                  /  \\
+                 |    |
+               * \\__/ *
+              ***    ***
+             *****  *****
+              ***    ***
+               *      *
+            "
+          else
+            echo "🔄 En orbite à $COVERAGE% de couverture"
+          fi
+
+      - name: Vitesse Interstellaire ⏱️
+        if: always()
+        run: |
+          DURATION="${{ steps.test.outputs.duration }}"
+          echo "Tests complétés en $DURATION secondes"
+          
+          # Conversion en vitesse Warp imaginaire
+          WARP=$(echo "scale=2; 10 - (($DURATION / 30) * 5)" | bc -l)
+          if [ $(echo "$WARP > 0" | bc -l) -eq 1 ]; then
+            echo "🌠 Tests exécutés à Warp $WARP !"
+          else
+            echo "🐌 Tests plus lents qu'un vaisseau à propulsion conventionnelle !"
+          fi
+
+      - name: Journal de bord stellaire 📝
+        if: github.event_name == 'push'
+        run: |
+          DATE_STELLAIRE=$(date +%Y.%m.%d)
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Journal de bord, date stellaire $DATE_STELLAIRE : $COMMIT_MSG" > stellar_log.txt
+          echo "📜 Entrée ajoutée au journal de bord stellaire"
+
+      - name: Détection trou noir 🕳️
+        if: github.event_name == 'push'
+        run: |
+          ADDED=$(git diff --stat HEAD^ HEAD | tail -n 1 | awk '{print $4}')
+          DELETED=$(git diff --stat HEAD^ HEAD | tail -n 1 | awk '{print $6}')
+          
+          if [ -n "$DELETED" ] && [ -n "$ADDED" ] && [ $DELETED -gt $ADDED ]; then
+            echo "🕳️ Trou noir détecté ! $DELETED lignes supprimées, seulement $ADDED ajoutées."
+          fi
+
+      - name: Notification Slack
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,workflow
+          text: |
+            ${{ steps.test.outputs.weather == 'sunny' && '☀️ Mission spatiale réussie !' || '⛈️ Problèmes dans la station spatiale !' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
