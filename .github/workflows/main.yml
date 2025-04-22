@@ -184,7 +184,7 @@ jobs:
               "attachments": [
                 {
                   "fallback": "GIF Status",
-                  "image_url": "${{ steps.weather.outputs.status == '0' && 'https://media.tenor.com/EpRdRLqvhM4AAAAd/rocket-launch-space-x.gif' || 'https://media1.tenor.com/m/w6Zj_vJFCfcAAAAd/fun-lol.gif' }}"
+                  "image_url": "${{ steps.weather.outputs.status == '0' && 'https://media1.tenor.com/m/4aOGa3qJd48AAAAC/zelda-vieux.gif' || 'https://media.tenor.com/KXiaGEO_avgAAAAM/king-harkinian.gif' }}"
                 }
               ]
             }
