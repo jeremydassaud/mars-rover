@@ -174,20 +174,14 @@ jobs:
           if [ -n "$DELETED" ] && [ -n "$ADDED" ] && [ $DELETED -gt $ADDED ]; then
             echo "🕳️ Trou noir détecté ! $DELETED lignes supprimées, seulement $ADDED ajoutées."
           fi
-      - name: Notification Slack avec GIF
+      - name: Notification Slack simple avec lien GIF
         if: always() && env.SLACK_WEBHOOK_URL != ''
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: 8398a7/action-slack@v3
         with:
-          payload: |
-            {
-              "text": "${{ steps.weather.outputs.status == 'sunny' && '☀️ Mission spatiale réussie !' || '⛈️ Problèmes dans la station spatiale !' }}",
-              "attachments": [
-                {
-                  "fallback": "GIF Status",
-                  "image_url": "${{ steps.weather.outputs.status == 'sunny' && 'https://media.tenor.com/EpRdRLqvhM4AAAAd/rocket-launch-space-x.gif' || 'https://tenor.com/bEXNQ.gif' }}"
-                }
-              ]
-            }
+          status: ${{ job.status }}
+          fields: repo,commit,author
+          text: |
+            ${{ steps.weather.outputs.status == 'sunny' && '☀️ Mission spatiale réussie !' || '⛈️ Problèmes dans la station spatiale !' }}
+            ${{ steps.weather.outputs.status == 'sunny' && 'https://media.tenor.com/EpRdRLqvhM4AAAAd/rocket-launch-space-x.gif' || 'https://tenor.com/bEXNQ.gif' }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
