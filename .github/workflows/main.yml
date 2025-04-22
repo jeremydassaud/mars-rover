@@ -174,13 +174,42 @@ jobs:
           if [ -n "$DELETED" ] && [ -n "$ADDED" ] && [ $DELETED -gt $ADDED ]; then
             echo "🕳️ Trou noir détecté ! $DELETED lignes supprimées, seulement $ADDED ajoutées."
           fi
-      - name: Notification Slack
-        if: always()
-        uses: 8398a7/action-slack@v3
+      - name: Notification Slack avec GIF
+        if: always() && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1.24.0
         with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,workflow
-          text: |
-             ${{ steps.test.outputs.weather == 'sunny' && 'https://tenor.com/bEXNQ.gif Mission spatiale réussie !' || 'https://tenor.com/bEXNQ.gif Problèmes dans la station spatiale !' }}
-        env:
-           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Mission spatiale ${{ github.repository }}*\n${{ github.actor }} a lancé une nouvelle mission !"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.weather.outputs.status == 'sunny' && '🟢 Mission accomplie avec succès !' || '🔴 Houston, nous avons un problème !' }}"
+                  }
+                },
+                {
+                  "type": "image",
+                  "image_url": "${{ steps.weather.outputs.status == 'sunny' && 'https://media.tenor.com/EpRdRLqvhM4AAAAd/rocket-launch-space-x.gif' || 'https://tenor.com/bEXNQ.gif' }}",
+                  "alt_text": "Space GIF"
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "👾 *Commit:* ${{ github.event.after || github.sha }} | *Branche:* ${{ github.ref_name }} | *Workflow:* ${{ github.workflow }}"
+                    }
+                  ]
+                }
+              ]
+            }
+            env:
+                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
