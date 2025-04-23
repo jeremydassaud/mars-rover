@@ -1,0 +1,13 @@
+FROM nginx:stable-alpine-perl
+
+# Créer un répertoire de travail
+WORKDIR /usr/share/nginx/html
+
+# Créer une page HTML simple
+RUN echo '<html><body><h1>Hello World Docker</h1></body></html>' > index.html
+
+# Exposer le port 80
+EXPOSE 80
+
+# Commande par défaut pour démarrer NGINX
+CMD ["nginx", "-g", "daemon off;"]

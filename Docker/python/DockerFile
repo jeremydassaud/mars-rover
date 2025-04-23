@@ -1,0 +1,17 @@
+# Utiliser une image de base Python
+FROM python:3.9-slim
+
+# Définir le répertoire de travail dans le conteneur
+WORKDIR /app
+
+# Copier les fichiers nécessaires dans le conteneur
+COPY . /app
+
+# Installer les dépendances nécessaires
+RUN pip install flask
+
+# Exposer le port 5000 pour le serveur web
+EXPOSE 5000
+
+# Commande pour lancer le serveur web
+CMD ["python", "-m", "flask", "run", "--host=0.0.0.0"]
