@@ -1,0 +1,25 @@
+services:
+  bossfinal.server:
+    image: ${DOCKER_REGISTRY-}bossfinalserver
+    build:
+      context: .
+      dockerfile: BossFinal.Server/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: $USER
+      POSTGRES_PASSWORD: $PASSWORD
+      POSTGRES_DB: $NAME
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d testdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
