@@ -1,5 +1,6 @@
 services:
   bossfinal.server:
+    user: root
     image: ${DOCKER_REGISTRY-}bossfinalserver
     build:
       context: .
@@ -7,6 +8,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      - ASPNETCORE_URLS=https://0.0.0.0:5000
+      - ASPNETCORE_HTTPS_PORT=5000
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=simplepassword
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/certificate.pfx
+    volumes:
+      - ./certificate:/https
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
   db:
     image: postgres:14-alpine
     environment:
@@ -23,3 +35,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

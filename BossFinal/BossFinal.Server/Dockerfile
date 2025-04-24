@@ -10,6 +10,13 @@ EXPOSE 8081
 
 # Cette phase est utilisée pour générer le projet de service
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["BossFinal.Server/BossFinal.Server.csproj", "BossFinal.Server/"]
