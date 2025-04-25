@@ -20,3 +20,18 @@ resource "docker_container" "web" {
         external = 8080
     }
 }
+
+resource "docker_container" "db"{
+    name = "mars-db"
+    image = "mysql:8.0"
+    env = [
+        "MYSQL_ROOT_PASSWORD=rover",
+    ]
+    networks_advanced{
+        name = docker_network.mars_net.name
+    }
+}
+
+resource "docker_network" "mars_net" {
+    name = "mars-network"
+}
